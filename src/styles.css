@@ -1,10 +1,30 @@
 /* palate https://coolors.co/0a090c-f0edee-07393c-2c666e-90ddf0 */
 :root {
   --bg: #0A090C;
+  --bg-secondary: #07393C;
   --text: #F0EDEE;
+
+  --bg-sizing: 25px;
+  --bg-lines-thickness: 24px; /* usually gonna be 1px less that the bg sizing */
 }
 
 body {
-  background-color: var(--bg);
   color: var(--text);
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(0deg, transparent 0, transparent var(--bg-lines-thickness), var(--bg-secondary) var(--bg-sizing)), /* Vertical line */
+  repeating-linear-gradient(90deg, transparent 0, transparent var(--bg-lines-thickness), var(--bg-secondary) var(--bg-sizing)); /* Horizontal line */
+  background-size: var(--bg-sizing) var(--bg-sizing);
+}
+.node {
+  background-color: rgba(144, 221, 240, .2);
+  padding: 1rem;
+  border-radius: 1.5rem;
+  width: 80%;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 3rem;
 }
