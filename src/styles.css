@@ -1,0 +1,10 @@
+/* palate https://coolors.co/0a090c-f0edee-07393c-2c666e-90ddf0 */
+:root {
+  --bg: #0A090C;
+  --text: #F0EDEE;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
