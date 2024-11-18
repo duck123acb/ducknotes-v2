@@ -1,83 +1,167 @@
+use serde::Serialize;
+
+#[derive(Serialize)]
 struct Element {
-	element_type: String,
-	content: String,
-	children: Vec<Element>
+    element_type: String,
+    content: String,
+    sub_elements: Vec<Element>,
 }
 impl Element {
-	fn new(element_type: &str, content: &str, sub_elements: children: Vec<Element>) -> Self {
-		Element {
-			element_type: element_type.to_string(),
-			content: content.to_string(),
-			children: children
-		}
-	}
-	fn new(element_type: &str, sub_elements: children: Vec<Element>) -> Self {
-		Element {
-			element_type: element_type.to_string(),
-			content: "".to_string(),
-			children: children
-		}
-	}
+    fn new(element_type: &str, content: &str) -> Self {
+        Element {
+            element_type: element_type.to_string(),
+            content: content.to_string(),
+            sub_elements: Vec::new(),
+        }
+    }
+    fn new_without_content(element_type: &str, sub_elements: Vec<Element>) -> Self {
+        Element {
+            element_type: element_type.to_string(),
+            content: "".to_string(),
+            sub_elements,
+        }
+    }
 }
 
-fn parse_inline(text: &str) -> Vec<Element> { // parses within a line for things like bold, italics, etc.
-  let mut elements = Vec::new();
+fn find_outer_symbols(markdown: &str) -> Vec<(String, usize, usize)> {
+    let symbols = vec!["**", "*", "~~"];
+    let mut stack: Vec<(String, usize)> = Vec::new();
+    let mut pairs: Vec<(String, usize, usize)> = Vec::new();
 
-  for character in text.chars() {
+    let mut i = 0;
+    while i < markdown.len() {
+        for &sym in &symbols {
+            if markdown[i..].starts_with(sym) {
+                if let Some((last_sym, start)) = stack.last().cloned() {
+                    if last_sym == sym {
+                        stack.pop(); // closing
+                        pairs.push((sym.to_string(), start, i));
+                        i += sym.len() - 1;
+                        break;
+                    }
+                }
 
-  }
+                stack.push((sym.to_string(), i)); // push new symbol
+                i += sym.len() - 1;
+                break;
+            }
+        }
+        i += 1;
+    }
 
-  elements
+    // filter outermost symbols
+    pairs
+        .clone()
+        .into_iter()
+        .filter(|(_sym, open, close)| !pairs.iter().any(|(_, o, c)| *open > *o && *close < *c))
+        .collect()
+}
+
+fn parse_in_element(text: &str) -> Vec<Element> {
+    // parses within an element for things like bold, italics, etc.
+    let mut elements = Vec::new();
+
+    let outer_md_elements = find_outer_symbols(&text);
+
+    let first_md_elem_start = &outer_md_elements[0].1;
+    if *first_md_elem_start != 0 {
+        elements.push(Element::new("p", &text[0..*first_md_elem_start]));
+    }
+
+    for (i, md_element) in outer_md_elements.iter().enumerate() {
+        elements.push(Element::new_without_content(
+            &md_element.0,
+            parse_in_element(&text[md_element.1..md_element.2]),
+        ));
+
+        // if this isn't the last element
+        if i == outer_md_elements.len() - 1 {
+            continue;
+        }
+        // if there is no gap
+        let next_element = &outer_md_elements[i + 1];
+        if md_element.2 + 1 == next_element.1 {
+            continue;
+        }
+        elements.push(Element::new("p", &text[md_element.2..next_element.1]));
+    }
+
+    let last_md_elem_end = &outer_md_elements[text.len() - 1].2;
+    if *last_md_elem_end != text.len() {
+        elements.push(Element::new("p", &text[*last_md_elem_end..text.len()]));
+    }
+
+    elements
 }
 
 fn parse_line(line: &str) -> Vec<Element> {
-  let mut elements = Vec::new();
+    let mut elements = Vec::new();
 
-  if trimmed_line.starts_with("# ") {
-    elements.push(Element::new("h1", parse_inline(&trimmed_line[2..])));
-  } else if trimmed_line.starts_with("## ") {
-    elements.push(Element::new("h2", parse_inline(&trimmed_line[3..])));
-  } else if trimmed_line.starts_with("### ") {
-    elements.push(Element::new("h3", parse_inline(&trimmed_line[4..])));
-  } else if trimmed_line.starts_with("#### ") {
-    elements.push(Element::new("h4", parse_inline(&trimmed_line[5..])));
-  } else if trimmed_line.starts_with("##### ") {
-    elements.push(Element::new("h5", parse_inline(&trimmed_line[6..])));
-  } else if trimmed_line.starts_with("###### ") {
-    elements.push(Element::new("h6", parse_inline(&trimmed_line[7..])));
-  } else if trimmed_line.starts_with("> ") {
-    elements.push(Element::new("blockquote", parse_inline(&trimmed_line[2..])));
-  } else { // default
-    elements.push(Element::new("p", &parse_inline(trimmed_line)));
-  }
+    if line.starts_with("# ") {
+        elements.push(Element::new_without_content(
+            "h1",
+            parse_in_element(&line[2..]),
+        ));
+    } else if line.starts_with("## ") {
+        elements.push(Element::new_without_content(
+            "h2",
+            parse_in_element(&line[3..]),
+        ));
+    } else if line.starts_with("### ") {
+        elements.push(Element::new_without_content(
+            "h3",
+            parse_in_element(&line[4..]),
+        ));
+    } else if line.starts_with("#### ") {
+        elements.push(Element::new_without_content(
+            "h4",
+            parse_in_element(&line[5..]),
+        ));
+    } else if line.starts_with("##### ") {
+        elements.push(Element::new_without_content(
+            "h5",
+            parse_in_element(&line[6..]),
+        ));
+    } else if line.starts_with("###### ") {
+        elements.push(Element::new_without_content(
+            "h6",
+            parse_in_element(&line[7..]),
+        ));
+    } else if line.starts_with("> ") {
+        elements.push(Element::new_without_content(
+            "blockquote",
+            parse_in_element(&line[2..]),
+        ));
+    } else {
+        // default
+        elements.push(Element::new_without_content("span", parse_in_element(line)));
+    }
 
-  elements
+    if line.ends_with("  ") {
+        elements.push(Element::new_without_content("br", Vec::new()));
+    }
+
+    elements
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn parse_md(content: String) -> Vec<Vec<Element>> {
-  let mut elements = Vec::new();
+fn parse_md(content: String) -> Vec<Element> {
+    let mut elements = Vec::new();
 
-  for line in content.lines() {
-    let clean_line = line.trim_start(); // remove any whitespace at the beginning
-  }
-  // if character is #*x then do header tag
-  // if character is * then italic
-  // if character is ** then bold
-  // if character is > then blockquote
-  // etc. for ol, ul, code, horizontal rules, links, strikethrough, and sub/superscript. might add more later
+    for line in content.lines() {
+        let clean_line = line.trim_start(); // remove any whitespace at the beginning
+        elements = parse_line(clean_line);
+    }
 
-  // based on the markdown cheat sheet https://www.markdownguide.org/cheat-sheet/
-
-  elements
+    elements
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  tauri::Builder::default()
-    .plugin(tauri_plugin_shell::init())
-    .invoke_handler(tauri::generate_handler![parse_md])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(tauri::generate_handler![parse_md])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

@@ -72,22 +72,22 @@ Now a nested list:
 
  1. First, get these ingredients:
 
-      * carrots
-      * celery
-      * lentils
+  * carrots
+  * celery
+  * lentils
 
  2. Boil some water.
 
  3. Dump everything in the pot and follow
     this algorithm:
 
-        find wooden spoon
-        uncover pot
-        stir
-        cover pot
-        balance wooden spoon precariously on pot handle
-        wait 10 minutes
-        goto first step (or shut off burner when done)
+      find wooden spoon
+      uncover pot
+      stir
+      cover pot
+      balance wooden spoon precariously on pot handle
+      wait 10 minutes
+      goto first step (or shut off burner when done)
 
     Do not bump wooden spoon or it will fall.
 
@@ -124,12 +124,12 @@ math should get its own line and be put in in double-dollarsigns:
 $$I = \\int \\rho R^{2} dV$$
 
 And note that you can backslash-escape any punctuation characters
-which you wish to be displayed literally, ex.: \\\`foo\\\`, \\\*bar\\\*, etc.``
+which you wish to be displayed literally, ex.: \\\`foo\\\`, \\\*bar\\\*, etc.`;
 
 async function calculateNode(content) {
   let elements = await invoke("parse_md", { content: content });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  calculateNode(exampleMD);
+  // h
 });
