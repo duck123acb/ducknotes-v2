@@ -63,6 +63,11 @@ fn parse_in_element(text: &str) -> Vec<Element> {
 
     let outer_md_elements = find_outer_symbols(&text);
 
+    if outer_md_elements.is_empty() {
+        elements.push(Element::new("p", &text));
+        return elements;
+    }
+
     let first_md_elem_start = &outer_md_elements[0].1;
     if *first_md_elem_start != 0 {
         elements.push(Element::new("p", &text[0..*first_md_elem_start]));
