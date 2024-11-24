@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 struct Element {
     element_type: String,
     content: String,
@@ -19,6 +19,14 @@ impl Element {
             element_type: element_type.to_string(),
             content: "".to_string(),
             sub_elements,
+        }
+    }
+    fn md_to_html(md_symbol: &str) -> &str {
+        match md_symbol {
+            "*" => "em",
+            "**" => "strong",
+            "~~" => "del",
+            _ => "span",
         }
     }
 }
@@ -64,19 +72,19 @@ fn parse_in_element(text: &str) -> Vec<Element> {
     let outer_md_elements = find_outer_symbols(&text);
 
     if outer_md_elements.is_empty() {
-        elements.push(Element::new("p", &text));
+        elements.push(Element::new("span", &text));
         return elements;
     }
 
     let first_md_elem_start = &outer_md_elements[0].1;
     if *first_md_elem_start != 0 {
-        elements.push(Element::new("p", &text[0..*first_md_elem_start]));
+        elements.push(Element::new("span", &text[0..*first_md_elem_start]));
     }
 
     for (i, md_element) in outer_md_elements.iter().enumerate() {
         elements.push(Element::new_without_content(
-            &md_element.0,
-            parse_in_element(&text[md_element.1..md_element.2]),
+            Element::md_to_html(&md_element.0),
+            parse_in_element(&text[md_element.1 + md_element.0.len()..md_element.2]), // md_element.1 is when it the first symbol occurs
         ));
 
         // if this isn't the last element
@@ -88,12 +96,7 @@ fn parse_in_element(text: &str) -> Vec<Element> {
         if md_element.2 + 1 == next_element.1 {
             continue;
         }
-        elements.push(Element::new("p", &text[md_element.2..next_element.1]));
-    }
-
-    let last_md_elem_end = &outer_md_elements[text.len() - 1].2;
-    if *last_md_elem_end != text.len() {
-        elements.push(Element::new("p", &text[*last_md_elem_end..text.len()]));
+        elements.push(Element::new("span", &text[md_element.2..next_element.1]));
     }
 
     elements
@@ -156,9 +159,10 @@ fn parse_md(content: String) -> Vec<Element> {
 
     for line in content.lines() {
         let clean_line = line.trim_start(); // remove any whitespace at the beginning
-        elements = parse_line(clean_line);
+        elements.push(Element::new_without_content("span", parse_line(clean_line)));
     }
 
+    println!("{:?}", elements);
     elements
 }
 

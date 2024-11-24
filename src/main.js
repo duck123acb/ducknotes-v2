@@ -1,135 +1,174 @@
 const { invoke } = window.__TAURI__.core;
 
-// derived from https://gist.github.com/rt2zz/e0a1d6ab2682d2c47746950b84c0b6ee
-const exampleMD = `An h1 header
-============
+let parent;
 
-# Paragraphs are separated by a blank line.
+const exampleMD = `
+# Duck Notes
+This is a small note taking app for the web  
+For now, this use ~~editing~~ plain text documents quickly!  
+It is a local saving system  
+**Deploys *from* Netlify **
+`;
 
-2nd paragraph. *Italic*, **bold**, and \`monospace\`. Itemized lists
-look like:
+function renderElement(element) {
+  const { element_type, content, sub_elements } = element;
 
-  * this one
-  * that one
-  * the other one
+  const el = document.createElement(element_type);
 
-Note that --- not considering the asterisk --- the actual text
-content starts at 4-columns in.
+  el.textContent = content;
 
-> Block quotes are
-> written like so.
->
-> They can span multiple paragraphs,
-> if you like.
+  sub_elements.forEach((sub_element) => {
+    const subEl = renderElement(sub_element);
+    el.appendChild(subEl);
+  });
 
-Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all
-in chapters 12--14"). Three dots ... will be converted to an ellipsis.
-Unicode is supported. ☺
-
-
-
-## An h2 header
-------------
-
-Here's a numbered list:
-
- 1. first item
- 2. second item
- 3. third item
-
-Note again how the actual text starts at 4 columns in (4 characters
-from the left side). Here's a code sample:
-
-    # Let me re-iterate ...
-    for i in 1 .. 10 { do-something(i) }
-
-As you probably guessed, indented 4 spaces. By the way, instead of
-indenting the block, you can use delimited blocks, if you like:
-
-~~~
-define foobar() {
-  print "Welcome to flavor country!";
+  return el;
 }
-~~~
-
-(which makes copying & pasting easier). You can optionally mark the
-delimited block for Pandoc to syntax highlight it:
-
-~~~python
-import time
-# Quick, count to ten!
-for i in range(10):
-  # (but not *too* quick)
-  time.sleep(0.5)
-  print i
-~~~
-
-
-
-### An h3 header
-
-Now a nested list:
-
- 1. First, get these ingredients:
-
-  * carrots
-  * celery
-  * lentils
-
- 2. Boil some water.
-
- 3. Dump everything in the pot and follow
-    this algorithm:
-
-      find wooden spoon
-      uncover pot
-      stir
-      cover pot
-      balance wooden spoon precariously on pot handle
-      wait 10 minutes
-      goto first step (or shut off burner when done)
-
-    Do not bump wooden spoon or it will fall.
-
-Notice again how text always lines up on 4-space indents (including
-that last line which continues item 3 above).
-
-Here's a link to [a website](http://foo.bar), to a [local
-doc](local-doc.html), and to a [section heading in the current
-doc](#an-h2-header). Here's a footnote [^1].
-***
-
-Here's a definition list:
-
-apples
-  : Good for making applesauce.
-oranges
-  : Citrus!
-tomatoes
-  : There's no "e" in tomatoe.
-
-Again, text is indented 4 spaces. (Put a blank line between each
-term/definition pair to spread things out more.)
-
-Here's a "line block":
-
-| Line one
-|   Line too
-| Line tree
-
-
-Inline math equations go in like so: $\\omega = d\\phi / dt$. Display
-math should get its own line and be put in in double-dollarsigns:
-
-$$I = \\int \\rho R^{2} dV$$
-
-And note that you can backslash-escape any punctuation characters
-which you wish to be displayed literally, ex.: \\\`foo\\\`, \\\*bar\\\*, etc.`;
 
 async function calculateNode(content) {
   let elements = await invoke("parse_md", { content: content });
+
+  elements.forEach((element) => {
+    const el = renderElement(element);
+
+    parent.appendChild(el);
+  });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  // h
+  parent = document.querySelector("#parent");
+  calculateNode(exampleMD);
 });
+
+/*
+
+  [
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [Element {
+                element_type: "span",
+                content: "",
+                sub_elements: [Element {
+                    element_type: "span",
+                    content: "",
+                    sub_elements: [],
+                }],
+            }],
+        },
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [Element {
+                element_type: "h1",
+                content: "",
+                sub_elements: [Element {
+                    element_type: "span",
+                    content: "Duck Notes",
+                    sub_elements: [],
+                }],
+            }],
+        },
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [
+                Element {
+                    element_type: "span",
+                    content: "",
+                    sub_elements: [Element {
+                        element_type: "span",
+                        content: "This is a small note taking app for the web  ",
+                        sub_elements: [],
+                    }],
+                },
+                Element {
+                    element_type: "br",
+                    content: "",
+                    sub_elements: [],
+                },
+            ],
+        },
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [
+                Element {
+                    element_type: "span",
+                    content: "",
+                    sub_elements: [
+                        Element {
+                            element_type: "span",
+                            content: "For now, this use ",
+                            sub_elements: [],
+                        },
+                        Element {
+                            element_type: "del",
+                            content: "",
+                            sub_elements: [Element {
+                                element_type: "span",
+                                content: "editing",
+                                sub_elements: [],
+                            }],
+                        },
+                    ],
+                },
+                Element {
+                    element_type: "br",
+                    content: "",
+                    sub_elements: [],
+                },
+            ],
+        },
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [
+                Element {
+                    element_type: "span",
+                    content: "",
+                    sub_elements: [Element {
+                        element_type: "span",
+                        content: "It is a local saving system  ",
+                        sub_elements: [],
+                    }],
+                },
+                Element {
+                    element_type: "br",
+                    content: "",
+                    sub_elements: [],
+                },
+            ],
+        },
+        Element {
+            element_type: "span",
+            content: "",
+            sub_elements: [Element {
+                element_type: "span",
+                content: "",
+                sub_elements: [Element {
+                    element_type: "strong",
+                    content: "",
+                    sub_elements: [
+                        Element {
+                            element_type: "span",
+                            content: "Deploys ",
+                            sub_elements: [],
+                        },
+                        Element {
+                            element_type: "em",
+                            content: "",
+                            sub_elements: [Element {
+                                element_type: "span",
+                                content: "from",
+                                sub_elements: [],
+                            }],
+                        },
+                    ],
+                }],
+            }],
+        },
+    ]
+
+
+  */
