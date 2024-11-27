@@ -4,10 +4,10 @@ let parent;
 
 const exampleMD = `
 # Duck Notes
-This is a small note taking app for the web  
+This is a small note taking app for the web.  
 For now, this use ~~editing~~ plain text documents quickly!  
 It is a local saving system  
-**Deploys *from* Netlify **
+**Deploys *from* Netlify**
 `;
 
 function renderElement(element) {

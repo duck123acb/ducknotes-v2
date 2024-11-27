@@ -77,8 +77,9 @@ fn parse_in_element(text: &str) -> Vec<Element> {
     }
 
     let first_md_elem_start = &outer_md_elements[0].1;
-    if *first_md_elem_start != 0 {
-        elements.push(Element::new("span", &text[0..*first_md_elem_start]));
+    let pre_text = &text[0..*first_md_elem_start];
+    if !pre_text.is_empty() {
+        elements.push(Element::new("span", pre_text));
     }
 
     for (i, md_element) in outer_md_elements.iter().enumerate() {
@@ -97,6 +98,14 @@ fn parse_in_element(text: &str) -> Vec<Element> {
             continue;
         }
         elements.push(Element::new("span", &text[md_element.2..next_element.1]));
+    }
+
+    let last_md_elem_end = &outer_md_elements[outer_md_elements.len() - 1].2
+        + outer_md_elements[outer_md_elements.len() - 1].0.len();
+    let post_text = &text[last_md_elem_end..text.len()];
+    if !post_text.trim().is_empty() {
+        println!("{}", post_text);
+        elements.push(Element::new("span", post_text));
     }
 
     elements
@@ -162,7 +171,7 @@ fn parse_md(content: String) -> Vec<Element> {
         elements.push(Element::new_without_content("span", parse_line(clean_line)));
     }
 
-    println!("{:?}", elements);
+    // println!("{:?}", elements);
     elements
 }
 
