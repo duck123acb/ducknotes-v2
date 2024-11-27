@@ -104,7 +104,6 @@ fn parse_in_element(text: &str) -> Vec<Element> {
         + outer_md_elements[outer_md_elements.len() - 1].0.len();
     let post_text = &text[last_md_elem_end..text.len()];
     if !post_text.trim().is_empty() {
-        println!("{}", post_text);
         elements.push(Element::new("span", post_text));
     }
 
