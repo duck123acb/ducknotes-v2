@@ -85,7 +85,7 @@ fn parse_in_element(text: &str) -> Vec<Element> {
     for (i, md_element) in outer_md_elements.iter().enumerate() {
         elements.push(Element::new_without_content(
             Element::md_to_html(&md_element.0),
-            parse_in_element(&text[md_element.1 + md_element.0.len()..md_element.2]), // md_element.1 is when it the first symbol occurs
+            parse_in_element(&text[md_element.1 + md_element.0.len()..md_element.2]), // after the element open to before the element close
         ));
 
         // if this isn't the last element
@@ -101,7 +101,7 @@ fn parse_in_element(text: &str) -> Vec<Element> {
     }
 
     let last_md_elem_end = &outer_md_elements[outer_md_elements.len() - 1].2
-        + outer_md_elements[outer_md_elements.len() - 1].0.len();
+        + outer_md_elements[outer_md_elements.len() - 1].0.len(); // after the last element close to the end
     let post_text = &text[last_md_elem_end..text.len()];
     if !post_text.trim().is_empty() {
         elements.push(Element::new("span", post_text));
