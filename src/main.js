@@ -1,9 +1,8 @@
 const { invoke } = window.__TAURI__.core;
 
 let parent;
-
-const exampleMD = `
-# Duck Notes
+let isEditing = false;
+let rawMarkdown = `# Duck Notes
 This is a small note taking app for the web.  
 For now, this use ~~editing~~ plain text documents quickly!  
 It is a local saving system  
@@ -37,5 +36,22 @@ async function calculateNode(content) {
 
 window.addEventListener("DOMContentLoaded", () => {
   parent = document.querySelector("#parent");
-  calculateNode(exampleMD);
+
+  calculateNode(rawMarkdown);
+
+  parent.addEventListener("focus", () => {
+    if (!isEditing) {
+      isEditing = true;
+      parent.textContent = rawMarkdown;
+    }
+  });
+
+  parent.addEventListener("keypress", (e) => {
+    if (isEditing && e.key == "Escape") {
+      parent.blur(); // ik blur is deprecated but it works so ima keep it until it DOESNT
+      isEditing = false;
+      parent.textContent = "";
+      calculateNode(rawMarkdown);
+    }
+  });
 });
