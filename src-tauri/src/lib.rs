@@ -77,14 +77,15 @@ fn parse_in_element(text: &str) -> Vec<Element> {
     }
 
     let first_md_elem_start = &outer_md_elements[0].1;
-    if *first_md_elem_start != 0 {
-        elements.push(Element::new("span", &text[0..*first_md_elem_start]));
+    let pre_text = &text[0..*first_md_elem_start];
+    if !pre_text.is_empty() {
+        elements.push(Element::new("span", pre_text));
     }
 
     for (i, md_element) in outer_md_elements.iter().enumerate() {
         elements.push(Element::new_without_content(
             Element::md_to_html(&md_element.0),
-            parse_in_element(&text[md_element.1 + md_element.0.len()..md_element.2]), // md_element.1 is when it the first symbol occurs
+            parse_in_element(&text[md_element.1 + md_element.0.len()..md_element.2]), // after the element open to before the element close
         ));
 
         // if this isn't the last element
@@ -97,6 +98,13 @@ fn parse_in_element(text: &str) -> Vec<Element> {
             continue;
         }
         elements.push(Element::new("span", &text[md_element.2..next_element.1]));
+    }
+
+    let last_md_elem_end = &outer_md_elements[outer_md_elements.len() - 1].2
+        + outer_md_elements[outer_md_elements.len() - 1].0.len(); // after the last element close to the end
+    let post_text = &text[last_md_elem_end..text.len()];
+    if !post_text.trim().is_empty() {
+        elements.push(Element::new("span", post_text));
     }
 
     elements
@@ -142,7 +150,7 @@ fn parse_line(line: &str) -> Vec<Element> {
         ));
     } else {
         // default
-        elements.push(Element::new_without_content("span", parse_in_element(line)));
+        elements.push(Element::new_without_content("div", parse_in_element(line)));
     }
 
     if line.ends_with("  ") {
@@ -162,7 +170,7 @@ fn parse_md(content: String) -> Vec<Element> {
         elements.push(Element::new_without_content("span", parse_line(clean_line)));
     }
 
-    println!("{:?}", elements);
+    // println!("{:?}", elements);
     elements
 }
 
