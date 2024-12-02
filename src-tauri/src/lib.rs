@@ -150,7 +150,7 @@ fn parse_line(line: &str) -> Vec<Element> {
         ));
     } else {
         // default
-        elements.push(Element::new_without_content("span", parse_in_element(line)));
+        elements.push(Element::new_without_content("div", parse_in_element(line)));
     }
 
     if line.ends_with("  ") {

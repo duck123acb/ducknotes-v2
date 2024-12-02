@@ -1,8 +1,15 @@
+@font-face {
+  font-family: "JetBrainsMono";
+  src: url("assets/JetBrainsMono-Medium.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* palate https://coolors.co/0a090c-f0edee-07393c-2c666e-90ddf0 */
 :root {
-  --bg: #0A090C;
-  --bg-secondary: #07393C;
-  --text: #F0EDEE;
+  --bg: #0a090c;
+  --bg-secondary: #07393c;
+  --text: #f0edee;
 
   --bg-sizing: 25px;
   --bg-lines-thickness: 24px; /* usually gonna be 1px less that the bg sizing */
@@ -10,14 +17,10 @@
 
 @keyframes moveBackground {
   0% {
-    background-position:
-      0 0,
-      0 0;
+    background-position: 0 0, 0 0;
   }
   100% {
-    background-position:
-      100% 100%,
-      100% 100%;
+    background-position: 100% 100%, 100% 100%;
   }
 }
 
@@ -26,10 +29,27 @@ body {
 
   color: var(--text);
   background-color: var(--bg);
-  background-image: repeating-linear-gradient(0deg, transparent 0, transparent var(--bg-lines-thickness), var(--bg-secondary) var(--bg-sizing)), /* Vertical line */
-  repeating-linear-gradient(90deg, transparent 0, transparent var(--bg-lines-thickness), var(--bg-secondary) var(--bg-sizing)); /* Horizontal line */
+  background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent var(--bg-lines-thickness),
+      var(--bg-secondary) var(--bg-sizing)
+    ),
+    /* Vertical line */
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent var(--bg-lines-thickness),
+        var(--bg-secondary) var(--bg-sizing)
+      ); /* Horizontal line */
   background-size: var(--bg-sizing) var(--bg-sizing);
   animation: moveBackground 120s linear infinite;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  font-family: "JetBrainsMono", monospace;
 }
 .node {
   background-color: #121212;
@@ -37,11 +57,11 @@ body {
   width: 80%;
   min-height: 100vh;
   filter: drop-shadow(10px 2px 2px var(--bg));
+
+  border-left: 1px solid slategray;
+  border-right: 1px solid slategray;
 }
 
-.container {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 3rem;
+div:focus {
+  outline: none; /* Removes the focus outline */
 }
