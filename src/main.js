@@ -39,19 +39,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
   calculateNode(rawMarkdown);
 
-  parent.addEventListener("focus", () => {
+  parent.addEventListener("click", () => {
     if (!isEditing) {
       isEditing = true;
       parent.textContent = rawMarkdown;
+      parent.setAttribute("contenteditable", "true");
     }
   });
-
-  parent.addEventListener("keypress", (e) => {
+  addEventListener("keypress", (e) => {
     if (isEditing && e.key == "Escape") {
-      parent.blur(); // ik blur is deprecated but it works so ima keep it until it DOESNT
       isEditing = false;
+      rawMarkdown = parent.textContent;
       parent.textContent = "";
       calculateNode(rawMarkdown);
+      parent.setAttribute("contenteditable", "false");
     }
   });
 });

@@ -58,8 +58,7 @@ body {
   min-height: 100vh;
   filter: drop-shadow(10px 2px 2px var(--bg));
 
-  border-left: 1px solid slategray;
-  border-right: 1px solid slategray;
+  border: 1px solid slategray;
 }
 
 div:focus {
